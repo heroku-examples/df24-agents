@@ -1,0 +1,49 @@
+#!/usr/bin/env ruby
+
+require "bundler"
+Bundler.require(:default)
+Dotenv.load
+
+require_relative "lib/render"
+
+renderer = Render.new
+
+PROMPT = "Visit apple.com and tell me how much AirPods Pro 2nd gen cost."
+
+request = <<~JSON
+{
+  "model": "claude-3-5-sonnet",
+  "messages": [
+    {
+      "role": "user",
+      "content": "#{PROMPT}"
+    }
+  ],
+  "tools": [
+    {
+      "type": "tool_url",
+      "function": "tool://tools.heroku.com/web_browsing/multi_page"
+    },
+    {
+      "type": "tool_url",
+      "function": "tool://tools.heroku.com/code_exec/node"
+    }
+  ],
+  "tool_choice": "auto"
+}
+JSON
+
+renderer.heroku_print("Here is the request we are sending to Heroku for inferencing...")
+
+renderer.print_markdown(
+  <<~MARKDOWN
+  ```json
+  #{request}
+  ```
+  MARKDOWN
+)
+
+answer = renderer.confirm("Ready to send the inference request?")
+exit(0) unless answer
+
+renderer.inference_request(request:)

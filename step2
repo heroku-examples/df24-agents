@@ -1,0 +1,99 @@
+#!/usr/bin/env ruby
+
+require "bundler"
+Bundler.require(:default)
+Dotenv.load
+
+# Require helper libs
+Dir.glob("**/*.rb", base: "lib").sort.each do |file|
+  require_relative "lib/#{file}"
+end
+
+renderer = Render.new
+response = nil
+
+client = OpenAI::Client.new(
+  access_token: ENV["DYNO_INTEROP_TOKEN"],
+  uri_base: ENV["DYNO_INTEROP_BASE_URL"]
+)
+
+PROMPT = "Who won the Formula 1 2024 Belgian Grand Prix? You can use the Wikipedia for the 2024 Belgian Grand Prix: https://en.m.wikipedia.org/wiki/2024_Belgian_Grand_Prix"
+
+request = <<~JSON
+{
+  "model": "claude-3-5-sonnet",
+  "messages": [
+    {
+      "role": "user",
+      "content": "#{PROMPT}"
+    }
+  ],
+  "tools": [
+    {
+      "type": "tool_url",
+      "function": "tool://tools.heroku.com/web_browsing/single_page"
+    }
+  ],
+  "tool_choice": "auto"
+}
+JSON
+
+renderer.heroku_print("Here is the request we are sending to Heroku for inferencing...")
+
+renderer.print_markdown(
+  <<~MARKDOWN
+  ```json
+  #{request}
+  ```
+  MARKDOWN
+)
+
+full_request = <<~JSON
+{
+  "model": "claude-3-5-sonnet",
+  "messages": [
+   {
+     "role": "user",
+     "content": "#{PROMPT}"
+   }
+  ],
+  "tools": [
+   {
+     "type": "function",
+     "function": {
+       "name": "heroku_web_browsing_single_page",
+       "description": "Visits a single URL and returns the content of the web page as Markdown text.",
+       "parameters": {
+         "type": "object",
+         "properties": {
+           "url": {
+             "type": "string",
+             "description": "The URL to visit"
+           }
+         },
+         "required": [
+           "url"
+         ]
+       }
+     }
+   }
+  ],
+  "tool_choice": "auto"
+}
+JSON
+
+answer = renderer.confirm("Ready to see the full OpenAI-style request?")
+exit(0) unless answer
+
+renderer.print_markdown(
+  <<~MARKDOWN
+  ```json
+  #{full_request}
+  ```
+  MARKDOWN
+)
+
+answer = renderer.confirm("Ready to send the inference request?")
+exit(0) unless answer
+
+renderer.inference_request(request:)
