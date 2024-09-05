@@ -4,18 +4,9 @@ require "bundler"
 Bundler.require(:default)
 Dotenv.load
 
-# Require helper libs
-Dir.glob("**/*.rb", base: "lib").sort.each do |file|
-  require_relative "lib/#{file}"
-end
+require_relative "lib/render"
 
 renderer = Render.new
-response = nil
-
-client = OpenAI::Client.new(
-  access_token: ENV["DYNO_INTEROP_TOKEN"],
-  uri_base: ENV["DYNO_INTEROP_BASE_URL"]
-)
 
 PROMPT = "Who won the Formula 1 2024 Belgian Grand Prix? You can use the Wikipedia for the 2024 Belgian Grand Prix: https://en.m.wikipedia.org/wiki/2024_Belgian_Grand_Prix"
 
