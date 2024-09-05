@@ -3,10 +3,9 @@ source "https://rubygems.org"
 ruby file: ".ruby-version"
 
 gem "dotenv"
-gem "http"
-gem 'paint'
-gem 'rake'
+gem "pastel"
 gem "ruby-openai"
-gem "thor"
+gem "tty-box"
 gem "tty-markdown"
-gem "whirly"
+gem "tty-prompt"
+gem "tty-spinner"
