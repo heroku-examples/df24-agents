@@ -1,0 +1,64 @@
+#!/usr/bin/env ruby
+
+require "bundler"
+Bundler.require(:default)
+Dotenv.load
+
+require_relative "lib/render"
+
+renderer = Render.new
+
+prompt = "Take a random set of 3 leads (first name and last name) created in the last week and add them to my 'Reach Out' list in Trello."
+
+request = <<~JSON
+{
+  "model": "claude-3-5-sonnet",
+  "messages": [
+    {
+      "role": "user",
+      "content": "#{prompt}"
+    }
+  ],
+  "tools": [
+    {
+      "type": "tool_url",
+      "function": "tool://trello-creator.herokuapp.com/database/get_schema?db=DATABASE"
+    },
+    {
+      "type": "tool_url",
+      "function": "tool://trello-creator.herokuapp.com/database/run_query?db=DATABASE"
+    },
+    {
+      "type": "tool_url",
+      "function": "tool://trello-creator.herokuapp.com/dyno/run_command?cmd=leads_to_trello",
+      "description": "This tool is able to create Trello cards in the TODO list.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "lead_names": {
+            "type": "string",
+            "description": "A comma-separated list of lead names to add as Trello cards."
+          }
+        },
+        "required": ["content"]
+      }
+    }
+  ],
+  "tool_choice": "auto"
+}
+JSON
+
+renderer.heroku_print("Here is the request we are sending to Heroku for inferencing...")
+
+renderer.print_markdown(
+  <<~MARKDOWN
+  ```json
+  #{request}
+  ```
+  MARKDOWN
+)
+
+answer = renderer.confirm("Ready to send the inference request?")
+exit(0) unless answer
+
+renderer.inference_request(request:)
