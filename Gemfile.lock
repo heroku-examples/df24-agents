@@ -44,6 +44,9 @@ GEM
       strings (~> 0.2.0)
       tty-color (~> 0.5)
       tty-screen (~> 0.8)
+    tty-pie (0.4.0)
+      pastel (~> 0.8)
+      tty-cursor (~> 0.7)
     tty-prompt (0.23.1)
       pastel (~> 0.8)
       tty-reader (~> 0.8)
@@ -78,6 +81,7 @@ DEPENDENCIES
   ruby-openai
   tty-box
   tty-markdown
+  tty-pie
   tty-prompt
   tty-spinner
 

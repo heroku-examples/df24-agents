@@ -55,7 +55,7 @@ class Render
     puts "\n#{box}"
   end
 
-  def inference_request(request:)
+  def inference_request(request:, print_last_message: true)
     request = JSON.parse(request)
     responses = []
     spinner = nil
@@ -84,7 +84,11 @@ class Render
     spinner.success
 
     # Print the content of the last response
-    print_box(responses.last.dig("choices", 0, "message", "content"))
+    if print_last_message
+      print_box(responses.last.dig("choices", 0, "message", "content"))
+    end
+
+    responses.last # Return the last response
   end
 
   def with_spinners(action_msg, &block)
@@ -128,6 +132,8 @@ class Render
           "Querying the database..."
         when /\Aheroku_dyno_run_command/
           "Running the command on the Heroku dyno..."
+        when "create_pie_chart"
+          "The agent is requesting a local tool..."
         end
       else
         "The agent has the information it needs."

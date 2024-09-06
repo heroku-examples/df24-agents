@@ -1,0 +1,108 @@
+#!/usr/bin/env ruby
+
+require "bundler"
+Bundler.require(:default)
+Dotenv.load
+
+require_relative "lib/render"
+
+renderer = Render.new
+
+prompt = "Examine the leads in the database and create a pie chart showing 3 different cohorts. The first, are leads created 3 days ago. The second are leads created 2 days ago. The third cohort are leads created yesterday."
+
+request = <<~JSON
+{
+  "model": "claude-3-5-sonnet",
+  "messages": [
+    {
+      "role": "user",
+      "content": "#{prompt}"
+    }
+  ],
+  "tools": [
+    {
+      "type": "tool_url",
+      "function": "tool://trello-creator.herokuapp.com/database/get_schema?db=DATABASE"
+    },
+    {
+      "type": "tool_url",
+      "function": "tool://trello-creator.herokuapp.com/database/run_query?db=DATABASE"
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "create_pie_chart",
+        "description": "Creates a pie chart for 3 given values",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "cohort_1": {
+              "type": "integer",
+              "description": "The first cohort value"
+            },
+            "cohort_1_label": {
+              "type": "string",
+              "description": "The label to use for the first cohort. What does it represent?"
+            },
+            "cohort_2": {
+              "type": "integer",
+              "description": "The second cohort value"
+            },
+            "cohort_2_label": {
+              "type": "string",
+              "description": "The label to use for the second cohort. What does it represent?"
+            },
+            "cohort_3": {
+              "type": "integer",
+              "description": "The third cohort value"
+            },
+            "cohort_3_label": {
+              "type": "string",
+              "description": "The label to use for the third cohort. What does it represent?"
+            }
+          },
+          "required": ["cohort_1", "cohort_1_label", "cohort_2", "cohort_2_label", "cohort_3", "cohort_3_label"]
+        }
+      }
+    }
+  ],
+  "tool_choice": "auto"
+}
+JSON
+
+renderer.heroku_print("Here is the request we are sending to Heroku for inferencing...")
+
+renderer.print_markdown(
+  <<~MARKDOWN
+  ```json
+  #{request}
+  ```
+  MARKDOWN
+)
+
+answer = renderer.confirm("Ready to send the inference request?")
+exit(0) unless answer
+
+response = renderer.inference_request(request:, print_last_message: false)
+
+params = response.dig("choices", 0, "message", "tool_calls", 0, "function", "arguments")
+parsed_params = JSON.parse(params)
+data = []
+styles = [
+  { color: :bright_yellow, fill: "*" },
+  { color: :bright_green, fill: "x" },
+  { color: :bright_magenta, fill: "@" }
+]
+styles.each.with_index do |style, i|
+  data << {
+    name: parsed_params["cohort_#{i + 1}_label"],
+    value: Integer(parsed_params["cohort_#{i + 1}"]),
+    color: style[:color],
+    fill: style[:fill]
+  }
+end
+
+puts "\n"
+
+pie_chart = TTY::Pie.new(data: data, radius: 10)
+puts pie_chart
