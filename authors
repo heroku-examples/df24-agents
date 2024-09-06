@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+
+require "bundler"
+Bundler.require(:default)
+Dotenv.load
+
+font = TTY::Font.new(:standard)
+
+pastel = Pastel.new
+
+authors = [
+  "Rand Fitzpatrick",
+  "Marcus Blankenship",
+  "Hillary Sanders",
+  "Vera Gangeskar Johne",
+  "Joanne Yeung",
+  "Mauricio Gomes"
+]
+
+colors = %w[red green yellow blue magenta cyan]
+
+authors.each.with_index do |author, i|
+  puts pastel.send(colors[i], font.write(author))
+end

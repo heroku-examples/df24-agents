@@ -37,6 +37,7 @@ GEM
       tty-cursor (~> 0.7)
     tty-color (0.6.0)
     tty-cursor (0.7.1)
+    tty-font (0.5.0)
     tty-markdown (0.7.2)
       kramdown (>= 1.16.2, < 3.0)
       pastel (~> 0.8)
@@ -80,6 +81,7 @@ DEPENDENCIES
   pastel
   ruby-openai
   tty-box
+  tty-font
   tty-markdown
   tty-pie
   tty-prompt
