@@ -38,6 +38,10 @@ class Render
     puts TTY::Box.error(str)
   end
 
+  def select(question:, opts:)
+    @prompt.select(question, opts)
+  end
+
   def print_box(str)
     style = {
       border: {
