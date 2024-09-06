@@ -1,0 +1,71 @@
+#!/usr/bin/env ruby
+
+require "bundler"
+Bundler.require(:default)
+Dotenv.load
+
+require_relative "lib/render"
+
+renderer = Render.new
+
+puts "\n"
+sample_todos = [
+  "Buy more avocados",
+  "Finish the series Dark Matter",
+  "Call mom",
+  "Go for a run",
+  "Schedule dentist appointment",
+  "Paint the living room",
+  "Practice this recent piano sheet music"
+]
+answer = renderer.select(
+  question: "Select a TODO you want to create from the list below:",
+  opts: sample_todos
+)
+
+prompt = "Create a Trello card with the content `#{answer}` in the TODO list."
+
+request = <<~JSON
+{
+  "model": "claude-3-5-sonnet",
+  "messages": [
+    {
+      "role": "user",
+      "content": "#{prompt}"
+    }
+  ],
+  "tools": [
+    {
+      "type": "tool_url",
+      "function": "tool://trello-creator.herokuapp.com/dyno/run_command?cmd=create_card",
+      "description": "This tool is able to create Trello cards in the TODO list.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "The content for the Trello card"
+          }
+        },
+        "required": ["content"]
+      }
+    }
+  ],
+  "tool_choice": "auto"
+}
+JSON
+
+renderer.heroku_print("Here is the request we are sending to Heroku for inferencing...")
+
+renderer.print_markdown(
+  <<~MARKDOWN
+  ```json
+  #{request}
+  ```
+  MARKDOWN
+)
+
+answer = renderer.confirm("Ready to send the inference request?")
+exit(0) unless answer
+
+renderer.inference_request(request:)
