@@ -108,16 +108,22 @@ class Render
         args = JSON.parse(tool_call.dig("function", "arguments"))
 
         case tool_call.dig("function", "name")
-        when "heroku_web_browsing_single_page", "heroku_web_browsing_multi_page"
+        when /\Aheroku_web_browsing_single_page/, /\Aheroku_web_browsing_multi_page/
           "Fetching the page #{args["url"]} ..."
-        when "heroku_code_exec_ruby"
+        when /\Aheroku_code_exec_ruby/
           "Executing Ruby code..."
-        when "heroku_code_exec_python"
+        when /\Aheroku_code_exec_python/
           "Executing Python code..."
-        when "heroku_code_exec_node"
+        when /\Aheroku_code_exec_node/
           "Executing Node.js code..."
-        when "heroku_code_exec_go"
+        when /\Aheroku_code_exec_go/
           "Compiling and executing Go code..."
+        when /\Aheroku_database_get_schema/
+          "Fetching the schema for the database..."
+        when /\Aheroku_database_run_query/
+          "Querying the database..."
+        when /\Aheroku_dyno_run_command/
+          "Running the command on the Heroku dyno..."
         end
       else
         "The agent has the information it needs."
