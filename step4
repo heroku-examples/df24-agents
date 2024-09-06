@@ -1,0 +1,49 @@
+#!/usr/bin/env ruby
+
+require "bundler"
+Bundler.require(:default)
+Dotenv.load
+
+require_relative "lib/render"
+
+renderer = Render.new
+
+PROMPT = "How many leads were created last week?"
+
+request = <<~JSON
+{
+  "model": "claude-3-5-sonnet",
+  "messages": [
+    {
+      "role": "user",
+      "content": "#{PROMPT}"
+    }
+  ],
+  "tools": [
+    {
+      "type": "tool_url",
+      "function": "tool://trello-creator.herokuapp.com/database/get_schema?db=DATABASE"
+    },
+    {
+      "type": "tool_url",
+      "function": "tool://trello-creator.herokuapp.com/database/run_query?db=DATABASE"
+    }
+  ],
+  "tool_choice": "auto"
+}
+JSON
+
+renderer.heroku_print("Here is the request we are sending to Heroku for inferencing...")
+
+renderer.print_markdown(
+  <<~MARKDOWN
+  ```json
+  #{request}
+  ```
+  MARKDOWN
+)
+
+answer = renderer.confirm("Ready to send the inference request?")
+exit(0) unless answer
+
+renderer.inference_request(request:)
