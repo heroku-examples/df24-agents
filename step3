@@ -23,10 +23,6 @@ request = <<~JSON
     {
       "type": "tool_url",
       "function": "tool://tools.heroku.com/web_browsing/multi_page"
-    },
-    {
-      "type": "tool_url",
-      "function": "tool://tools.heroku.com/code_exec/node"
     }
   ],
   "tool_choice": "auto"
