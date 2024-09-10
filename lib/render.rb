@@ -116,21 +116,21 @@ class Render
         args = JSON.parse(tool_call.dig("function", "arguments"))
 
         case tool_call.dig("function", "name")
-        when /\Aheroku_web_browsing_single_page/, /\Aheroku_web_browsing_multi_page/
+        when /\Aweb_browsing_single_page/, /\Aweb_browsing_multi_page/
           "Fetching the page #{args["url"]} ..."
-        when /\Aheroku_code_exec_ruby/
+        when /\Acode_exec_ruby/
           "Executing Ruby code..."
-        when /\Aheroku_code_exec_python/
+        when /\Acode_exec_python/
           "Executing Python code..."
-        when /\Aheroku_code_exec_node/
+        when /\Acode_exec_node/
           "Executing Node.js code..."
-        when /\Aheroku_code_exec_go/
+        when /\Acode_exec_go/
           "Compiling and executing Go code..."
-        when /\Aheroku_database_get_schema/
+        when /\Adatabase_get_schema/
           "Fetching the schema for the database..."
-        when /\Aheroku_database_run_query/
+        when /\Adatabase_run_query/
           "Querying the database..."
-        when /\Aheroku_dyno_run_command/
+        when /\Adyno_run_command/
           "Running the command on the Heroku dyno..."
         when "create_pie_chart"
           "The agent is requesting a local tool..."

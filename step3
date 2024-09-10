@@ -8,7 +8,7 @@ require_relative "lib/render"
 
 renderer = Render.new
 
-PROMPT = "Visit apple.com and tell me how much AirPods Pro 2nd gen cost."
+PROMPT = "Visit apple.com and tell me how much AirPods Pro 2 cost."
 
 request = <<~JSON
 {
@@ -21,8 +21,8 @@ request = <<~JSON
   ],
   "tools": [
     {
-      "type": "tool_url",
-      "function": "tool://tools.heroku.com/web_browsing/multi_page"
+      "type": "heroku_tool",
+      "function": "web_browsing_multi_page"
     }
   ],
   "tool_choice": "auto"

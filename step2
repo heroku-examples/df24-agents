@@ -21,8 +21,8 @@ request = <<~JSON
   ],
   "tools": [
     {
-      "type": "tool_url",
-      "function": "tool://tools.heroku.com/web_browsing/single_page"
+      "type": "heroku_tool",
+      "function": "web_browsing_single_page"
     }
   ],
   "tool_choice": "auto"
@@ -52,7 +52,7 @@ full_request = <<~JSON
    {
      "type": "function",
      "function": {
-       "name": "heroku_web_browsing_single_page",
+       "name": "web_browsing_single_page",
        "description": "Visits a single URL and returns the content of the web page as Markdown text.",
        "parameters": {
          "type": "object",

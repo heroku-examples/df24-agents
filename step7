@@ -21,12 +21,24 @@ request = <<~JSON
   ],
   "tools": [
     {
-      "type": "tool_url",
-      "function": "tool://trello-creator.herokuapp.com/database/get_schema?db=DATABASE"
+      "type": "heroku_tool",
+      "function": "database_get_schema",
+      "runtime_params": {
+        "target_app_name": "heroku-df24-trello",
+        "tool_params": {
+          "db_attachment": "DATABASE"
+        }
+      }
     },
     {
-      "type": "tool_url",
-      "function": "tool://trello-creator.herokuapp.com/database/run_query?db=DATABASE"
+      "type": "heroku_tool",
+      "function": "database_run_query",
+      "runtime_params": {
+        "target_app_name": "heroku-df24-trello",
+        "tool_params": {
+          "db_attachment": "DATABASE"
+        }
+      }
     },
     {
       "type": "function",
