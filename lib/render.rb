@@ -55,6 +55,19 @@ class Render
     puts "\n#{box}"
   end
 
+  def print_large_box(str)
+    style = {
+      border: {
+        fg: :blue
+      }
+    }
+
+    box = TTY::Box.frame(width: 80, height: 40, align: :left, style:) do
+      str
+    end
+    puts "\n#{box}"
+  end
+
   def inference_request(request:, print_last_message: true)
     request = JSON.parse(request)
     responses = []

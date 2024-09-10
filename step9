@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+
+require "bundler"
+Bundler.require(:default)
+Dotenv.load
+
+require_relative "lib/render"
+
+renderer = Render.new
+
+prompt = "Use python-mnemonic library to generate a mnemonic code in English for the phrase 'Heroku AI'"
+
+request = <<~JSON
+{
+  "model": "claude-3-5-sonnet",
+  "messages": [
+    {
+      "role": "user",
+      "content": "#{prompt}"
+    }
+  ],
+  "tools": [
+    {
+      "type": "heroku_tool",
+      "function": "code_exec_python"
+    }
+  ],
+  "tool_choice": "auto"
+}
+JSON
+
+renderer.heroku_print("Here is the request we are sending to Heroku for inferencing...")
+
+renderer.print_markdown(
+  <<~MARKDOWN
+  ```json
+  #{request}
+  ```
+  MARKDOWN
+)
+
+answer = renderer.confirm("Ready to send the inference request?")
+exit(0) unless answer
+
+response = renderer.inference_request(request:, print_last_message: false)
+renderer.print_large_box(response.dig("choices", 0, "message", "content"))
