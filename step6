@@ -49,7 +49,7 @@ request = <<~JSON
           "cmd": "leads_to_trello"
         }
       },
-      "description": "This tool is able to create Trello cards in the TODO list.",
+      "description": "This tool is able to create Trello cards in the Reach Out list.",
       "parameters": {
         "type": "object",
         "properties": {
