@@ -8,7 +8,7 @@ require_relative "lib/render"
 
 renderer = Render.new
 
-PROMPT = "Visit apple.com and tell me how much the Apple Vision Pro costs."
+PROMPT = "Visit devcenter.heroku.com and tell me which regions Heroku Private Spaces are available in."
 
 request = <<~JSON
 {
