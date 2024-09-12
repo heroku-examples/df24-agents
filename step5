@@ -40,6 +40,9 @@ request = <<~JSON
       "function": "dyno_run_command",
       "runtime_params": {
         "target_app_name": "heroku-df24-trello",
+        "dyno_size": "Standard-2X",
+        "ttl_seconds": 300,
+        "max_retries": 2,
         "tool_params": {
           "cmd": "create_card"
         }
