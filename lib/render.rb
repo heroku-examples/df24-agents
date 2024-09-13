@@ -13,13 +13,16 @@ class Render
   end
 
   def print_markdown(md)
-    puts TTY::Markdown.parse(
-      <<~MARKDOWN
+    markdown = <<~MARKDOWN
 
-      #{md}
+    #{md}
 
-      MARKDOWN
-    )
+    MARKDOWN
+
+    # Hack to use GitHub Rouge theme
+    Rouge::Themes.const_set(:ThankfulEyes, Rouge::Themes::Github)
+
+    puts TTY::Markdown.parse(markdown)
   end
 
   def print_info(str)
