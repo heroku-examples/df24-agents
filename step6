@@ -80,3 +80,5 @@ answer = renderer.confirm("Ready to send the inference request?")
 exit(0) unless answer
 
 renderer.inference_request(request:)
+
+renderer.hr

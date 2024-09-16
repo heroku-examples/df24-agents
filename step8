@@ -37,3 +37,5 @@ exit(0) unless answer
 
 response = renderer.inference_request(request:, print_last_message: false)
 renderer.print_large_box(response.dig("choices", 0, "message", "content"))
+
+renderer.hr

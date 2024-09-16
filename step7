@@ -118,3 +118,5 @@ puts "\n"
 
 pie_chart = TTY::Pie.new(data: data, radius: 10)
 puts pie_chart
+
+renderer.hr
