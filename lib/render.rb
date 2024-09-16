@@ -20,6 +20,7 @@ class Render
     MARKDOWN
 
     # Hack to use GitHub Rouge theme
+    Rouge::Themes.send(:remove_const, :ThankfulEyes)
     Rouge::Themes.const_set(:ThankfulEyes, Rouge::Themes::Github)
 
     puts TTY::Markdown.parse(markdown)
