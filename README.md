@@ -1,6 +1,6 @@
 # Dreamforce 2024 Building Agentic AI Applications with Heroku
 
-This is the workshop code for the Dreamforce 2024 session "Building Agentic AI Applications with Heroku".
+This is the workshop code for the Dreamforce 2024 session ["Building Agentic AI Applications with Heroku"](https://reg.salesforce.com/flow/plus/df24/sessioncatalog/page/catalog/session/1718915855922001QjQx).
 
 ## Running the Workshop
 
