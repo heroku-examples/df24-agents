@@ -45,4 +45,24 @@ exit(0) unless answer
 response = renderer.inference_request(request:, print_last_message: false)
 renderer.print_large_box(response.dig("choices", 0, "message", "content"))
 
+# Let's print out the generated code
+renderer.all_responses.each do |r|
+  msg = r.dig("choices", 0, "message")
+  tool_call = msg.dig("tool_calls", 0)
+  if tool_call
+    args = JSON.parse(tool_call.dig("function", "arguments"))
+    if tool_call.dig("function", "name").match(/\Acode_exec_python/)
+      renderer.heroku_print("Here is what was run on the Dyno's shell prior to executing the code:")
+      renderer.print_markdown(args["shell_command"])
+      renderer.heroku_print("Here is the generated code that was run:")
+      python_code = <<~PYTHON
+      ```python
+      #{args["code"]}
+      ```
+      PYTHON
+      renderer.print_markdown(python_code)
+    end
+  end
+end
+
 renderer.hr

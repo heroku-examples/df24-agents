@@ -1,4 +1,6 @@
 class Render
+  attr_reader :all_responses
+
   def initialize
     @pastel = Pastel.new.magenta.bold.detach
     @prompt = TTY::Prompt.new
@@ -6,6 +8,7 @@ class Render
       access_token: ENV["DYNO_INTEROP_TOKEN"],
       uri_base: ENV["DYNO_INTEROP_BASE_URL"]
     )
+    @all_responses = [] # keeps a record of the responses that stream back
   end
 
   def heroku_print(str)
@@ -79,7 +82,6 @@ class Render
 
   def inference_request(request:, print_last_message: true)
     request = JSON.parse(request)
-    responses = []
     spinner = nil
 
     with_spinners("The Agent is...") do |spinners|
@@ -91,7 +93,7 @@ class Render
 
       stream_proc = Proc.new do |chunk, _bytesize|
         spinner.success if spinner
-        responses << chunk
+        @all_responses << chunk
         spinner = spinners.register(
           "#{summarize_message(chunk.dig("choices", 0, "message"))}... :spinner",
           success_mark: "✅"
@@ -107,10 +109,10 @@ class Render
 
     # Print the content of the last response
     if print_last_message
-      print_box(responses.last.dig("choices", 0, "message", "content"))
+      print_box(@all_responses.last.dig("choices", 0, "message", "content"))
     end
 
-    responses.last # Return the last response
+    @all_responses.last # Return the last response
   end
 
   def with_spinners(action_msg, &block)
