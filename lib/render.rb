@@ -46,6 +46,11 @@ class Render
     @prompt.select(question, opts)
   end
 
+  def hr
+    markdown_string = "\n\n***\n\n"
+    puts TTY::Markdown.parse(markdown_string)
+  end
+
   def print_box(str)
     style = {
       border: {
