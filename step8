@@ -8,7 +8,7 @@ require_relative "lib/render"
 
 renderer = Render.new
 
-prompt = "Use python-mnemonic library to generate a mnemonic code in English for the phrase 'Heroku AI'"
+prompt = "Use the python-mnemonic library to generate a mnemonic code in English for the phrase 'Heroku AI'"
 
 request = <<~JSON
 {
