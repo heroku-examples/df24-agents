@@ -101,7 +101,7 @@ params = response.dig("choices", 0, "message", "tool_calls", 0, "function", "arg
 parsed_params = JSON.parse(params)
 data = []
 styles = [
-  { color: :bright_yellow, fill: "*" },
+  { color: :bright_red, fill: "*" },
   { color: :bright_green, fill: "x" },
   { color: :bright_magenta, fill: "@" }
 ]
