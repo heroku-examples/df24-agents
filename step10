@@ -1,0 +1,74 @@
+#!/usr/bin/env ruby
+
+require "bundler"
+Bundler.require(:default)
+Dotenv.load
+
+require_relative "lib/render"
+
+renderer = Render.new
+
+prompt = "Visit the Wikipedia page for F1 contructors champions (https://en.m.wikipedia.org/wiki/List_of_Formula_One_World_Constructors%27_Champions) and calculate the average margin percentage (%) that teams win by. Also the median and standard deviation. Which team has won the most? I want you to use the Python code execution tool to perform your calculations."
+
+# prompt = "Solve x^2-x^3=80"
+
+request = <<~JSON
+{
+  "model": "claude-3-5-sonnet",
+  "messages": [
+    {
+      "role": "user",
+      "content": "#{prompt}"
+    }
+  ],
+  "tools": [
+    {
+      "type": "heroku_tool",
+      "function": "web_browsing_multi_page"
+    },
+    {
+      "type": "heroku_tool",
+      "function": "code_exec_python"
+    }
+  ],
+  "tool_choice": "auto"
+}
+JSON
+
+renderer.heroku_print("Here is the request we are sending to Heroku for inferencing...")
+
+renderer.print_markdown(
+  <<~MARKDOWN
+  ```json
+  #{request}
+  ```
+  MARKDOWN
+)
+
+answer = renderer.confirm("Ready to send the inference request?")
+exit(0) unless answer
+
+response = renderer.inference_request(request:, print_last_message: false)
+renderer.print_large_box(response.dig("choices", 0, "message", "content"))
+
+# Let's print out the generated code
+renderer.all_responses.each do |r|
+  msg = r.dig("choices", 0, "message")
+  tool_call = msg.dig("tool_calls", 0)
+  if tool_call
+    args = JSON.parse(tool_call.dig("function", "arguments"))
+    if tool_call.dig("function", "name").match(/\Acode_exec_python/)
+      renderer.heroku_print("Here is what was run on the Dyno's shell prior to executing the code:")
+      renderer.print_markdown(args["shell_command"])
+      renderer.heroku_print("Here is the generated code that was run:")
+      python_code = <<~PYTHON
+      ```python
+      #{args["code"]}
+      ```
+      PYTHON
+      renderer.print_markdown(python_code)
+    end
+  end
+end
+
+renderer.hr

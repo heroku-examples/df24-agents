@@ -23,8 +23,8 @@ class Render
     MARKDOWN
 
     # Hack to use GitHub Rouge theme
-    Rouge::Themes.send(:remove_const, :ThankfulEyes)
-    Rouge::Themes.const_set(:ThankfulEyes, Rouge::Themes::Github)
+    # Rouge::Themes.send(:remove_const, :ThankfulEyes)
+    # Rouge::Themes.const_set(:ThankfulEyes, Rouge::Themes::Github)
 
     puts TTY::Markdown.parse(markdown)
   end
@@ -158,6 +158,10 @@ class Render
           "Running the command on the Heroku dyno..."
         when "create_pie_chart"
           "The agent is requesting a local tool..."
+        when /\Asearch_web/
+          "Searching the web for #{args["search_query"]} ..."
+        when /\pdf_read/
+          "Reading the PDF at #{args["url"]} ..."
         end
       else
         "The agent has the information it needs."
