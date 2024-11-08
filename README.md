@@ -15,5 +15,6 @@ bundle install
 2. Copy `.env.example` to `.env` and fill in the necessary values.
    a. The `DYNO_INTEROP_TOKEN` is the token for the Dyno Interop service.
    b. The `DYNO_INTEROP_BASE_URL` is the URL of the Dyno Interop service.
+   c. If you are running the examples in a dark terminal, make sure `DARK_MODE` is set to `true`.
 
 3. Run each step with `./step1` or `./step2` etc.
