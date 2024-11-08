@@ -1,0 +1,68 @@
+#!/usr/bin/env ruby
+
+require "bundler"
+Bundler.require(:default)
+Dotenv.load
+
+require_relative "lib/render"
+
+renderer = Render.new
+
+prompt = "Use Open Meteo and tell the current weather and forecast in San Francisco, CA."
+
+request = <<~JSON
+{
+  "model": "claude-3-5-sonnet",
+  "messages": [
+    {
+      "role": "user",
+      "content": "#{prompt}"
+    }
+  ],
+  "tools": [
+    {
+      "type": "heroku_tool",
+      "function": "code_exec_ruby"
+    }
+  ],
+  "tool_choice": "auto"
+}
+JSON
+
+renderer.heroku_print("Here is the request we are sending to Heroku for inferencing...")
+
+renderer.print_markdown(
+  <<~MARKDOWN
+  ```json
+  #{request}
+  ```
+  MARKDOWN
+)
+
+answer = renderer.confirm("Ready to send the inference request?")
+exit(0) unless answer
+
+response = renderer.inference_request(request:, print_last_message: false)
+renderer.print_large_box(response.dig("choices", 0, "message", "content"))
+
+# Let's print out the generated code
+renderer.all_responses.each do |r|
+  msg = r.dig("choices", 0, "message")
+  tool_call = msg.dig("tool_calls", 0)
+  if tool_call
+    args = JSON.parse(tool_call.dig("function", "arguments"))
+    if tool_call.dig("function", "name").match(/\Acode_exec_ruby/)
+      renderer.heroku_print("Here is what was run on the Dyno's shell prior to executing the code:")
+      renderer.print_markdown(args["shell_command"])
+      renderer.heroku_print("Here is the generated code that was run:")
+      ruby_code = <<~RUBY
+      ```ruby
+      #{args["code"]}
+      ```
+      RUBY
+      renderer.print_markdown(ruby_code)
+    end
+  end
+end
+
+renderer.hr

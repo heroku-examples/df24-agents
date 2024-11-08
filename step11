@@ -8,7 +8,7 @@ require_relative "lib/render"
 
 renderer = Render.new
 
-prompt = "Who won the Detroit Lions game on Sept 30, 2024? Use the web."
+prompt = "Who won the Detroit Lions game on Nov 3, 2024? Use the web."
 
 request = <<~JSON
 {
