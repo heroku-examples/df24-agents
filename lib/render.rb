@@ -161,7 +161,7 @@ class Render
           "The agent is requesting a local tool..."
         when /\Asearch_web/
           "Searching the web for #{args["search_query"]} ..."
-        when /\pdf_read/
+        when /\Apdf_read/
           "Reading the PDF at #{args["url"]} ..."
         end
       else
