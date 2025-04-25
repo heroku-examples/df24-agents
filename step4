@@ -12,7 +12,7 @@ PROMPT = "How many leads were created last week?"
 
 request = <<~JSON
 {
-  "model": "claude-3-5-sonnet",
+  "model": "#{ENV["INFERENCE_MODEL_ID"]}",
   "messages": [
     {
       "role": "user",
@@ -22,21 +22,25 @@ request = <<~JSON
   "tools": [
     {
       "type": "heroku_tool",
-      "function": "database_get_schema",
+      "function": {
+        "name": "database_get_schema"
+      },
       "runtime_params": {
         "target_app_name": "heroku-df24-trello",
         "tool_params": {
-          "db_attachment": "DATABASE"
+          "db_attachment": "HEROKU_POSTGRESQL_CYAN"
         }
       }
     },
     {
       "type": "heroku_tool",
-      "function": "database_run_query",
+      "function": {
+        "name": "database_run_query"
+      },
       "runtime_params": {
         "target_app_name": "heroku-df24-trello",
         "tool_params": {
-          "db_attachment": "DATABASE"
+          "db_attachment": "HEROKU_POSTGRESQL_CYAN"
         }
       }
     }

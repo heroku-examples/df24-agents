@@ -8,11 +8,11 @@ require_relative "lib/render"
 
 renderer = Render.new
 
-PROMPT = "Who won the Formula 1 2024 Belgian Grand Prix? You can use the Wikipedia for the 2024 Belgian Grand Prix: https://en.m.wikipedia.org/wiki/2024_Belgian_Grand_Prix"
+PROMPT = "Who won the Formula 1 2025 Japanese Grand Prix? You can use the Wikipedia for the 2025 Japenese Grand Prix: https://en.wikipedia.org/wiki/2025_Japanese_Grand_Prix"
 
 request = <<~JSON
 {
-  "model": "claude-3-5-sonnet",
+  "model": "#{ENV["INFERENCE_MODEL_ID"]}",
   "messages": [
     {
       "role": "user",
@@ -22,7 +22,9 @@ request = <<~JSON
   "tools": [
     {
       "type": "heroku_tool",
-      "function": "web_browsing_single_page"
+      "function": {
+        "name": "web_browsing_single_page"
+      }
     }
   ],
   "tool_choice": "auto"
@@ -41,7 +43,7 @@ renderer.print_markdown(
 
 full_request = <<~JSON
 {
-  "model": "claude-3-5-sonnet",
+  "model": "#{ENV["INFERENCE_MODEL_ID"]}",
   "messages": [
    {
      "role": "user",
@@ -69,7 +71,8 @@ full_request = <<~JSON
      }
    }
   ],
-  "tool_choice": "auto"
+  "tool_choice": "auto",
+  "stream": true
 }
 JSON
 

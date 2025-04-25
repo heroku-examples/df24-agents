@@ -12,7 +12,7 @@ prompt = "Use the python-mnemonic library to generate a mnemonic code in English
 
 request = <<~JSON
 {
-  "model": "claude-3-5-sonnet",
+  "model": "#{ENV["INFERENCE_MODEL_ID"]}",
   "messages": [
     {
       "role": "user",

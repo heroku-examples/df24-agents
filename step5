@@ -27,7 +27,7 @@ prompt = "Create a Trello card with the content `#{answer}` in the TODO list."
 
 request = <<~JSON
 {
-  "model": "claude-3-5-sonnet",
+  "model": "#{ENV["INFERENCE_MODEL_ID"]}",
   "messages": [
     {
       "role": "user",

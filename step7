@@ -12,7 +12,7 @@ prompt = "Examine the leads in the database and create a pie chart showing 3 dif
 
 request = <<~JSON
 {
-  "model": "claude-3-5-sonnet",
+  "model": "#{ENV["INFERENCE_MODEL_ID"]}",
   "messages": [
     {
       "role": "user",

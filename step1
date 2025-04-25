@@ -10,11 +10,11 @@ renderer = Render.new
 
 request = <<~JSON
 {
-  "model": "claude-3-5-sonnet",
+  "model": "#{ENV["INFERENCE_MODEL_ID"]}",
   "messages": [
     {
       "role": "user",
-      "content": "Who won the Formula 1 2024 Belgian Grand Prix?"
+      "content": "Who won the Formula 1 2025 Japanese Grand Prix?"
     }
   ]
 }

@@ -8,11 +8,11 @@ require_relative "lib/render"
 
 renderer = Render.new
 
-PROMPT = "Visit devcenter.heroku.com and tell me which regions Heroku Private Spaces are available in."
+PROMPT = "Visit devcenter.heroku.com/articles/private-spaces and tell me which regions Heroku Private Spaces are available in."
 
 request = <<~JSON
 {
-  "model": "claude-3-5-sonnet",
+  "model": "#{ENV["INFERENCE_MODEL_ID"]}",
   "messages": [
     {
       "role": "user",
@@ -22,7 +22,9 @@ request = <<~JSON
   "tools": [
     {
       "type": "heroku_tool",
-      "function": "web_browsing_multi_page"
+      "function": {
+        "name": "web_browsing_multi_page"
+      }
     }
   ],
   "tool_choice": "auto"

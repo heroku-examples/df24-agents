@@ -12,7 +12,7 @@ prompt = "Take a random set of 3 leads (first name and last name) created in the
 
 request = <<~JSON
 {
-  "model": "claude-3-5-sonnet",
+  "model": "#{ENV["INFERENCE_MODEL_ID"]}",
   "messages": [
     {
       "role": "user",
