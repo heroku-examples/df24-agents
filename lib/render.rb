@@ -176,7 +176,7 @@ class Render
 
         case tool_name
         when /\Aweb_browsing_single_page/, /\Aweb_browsing_multi_page/
-          "Fetching the page #{args["url"]} ..."
+          "MIA is reading the page #{args["url"]} ..."
         when /\Acode_exec_ruby/
           "Executing Ruby code..."
         when /\Acode_exec_python/
@@ -186,13 +186,13 @@ class Render
         when /\Acode_exec_go/
           "Compiling and executing Go code..."
         when /\Adatabase_get_schema/
-          "Fetching the schema for the database..."
+          "MIA is the database's schema..."
         when /\Adatabase_run_query/
           "Querying the database..."
         when /\Adyno_run_command/
           "Running the command on the Heroku dyno..."
         when "create_pie_chart"
-          "The agent is requesting a local tool..."
+          "MIA is requesting a local tool..."
         when /\Asearch_web/
           "Searching the web for #{args["search_query"]} ..."
         when /\Apdf_read/
@@ -200,7 +200,7 @@ class Render
         end
       else
         _log_debug("No tool calls in assistant message")
-        "The agent has the information it needs."
+        "MIA has the information it needs."
       end
     end
   end
