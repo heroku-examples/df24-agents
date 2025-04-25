@@ -93,7 +93,7 @@ class Render
     _log_debug("Starting inference request with params: #{request.reject { |k, _| k == 'messages' }.inspect}")
     _log_debug("Request messages: #{request['messages'].inspect}") if request['messages']
 
-    with_spinners("The Agent is...") do |spinners|
+    with_spinners("MIA is thinking...") do |spinners|
       spinner = spinners.register(
         "Sending an inference request to Heroku... :spinner",
         success_mark: "✅"
@@ -132,9 +132,52 @@ class Render
     # Print the content of the last response
     if print_last_message
       print_box(@all_responses.last.dig("choices", 0, "message", "content"))
+
+      # Display tool call results if present
+      display_tool_results(@all_responses)
     end
 
     @all_responses.last # Return the last response
+  end
+
+  # Display results from tool calls, particularly database related ones
+  def display_tool_results(responses)
+    # Track tool calls and responses
+    query_results = []
+
+    # Print summary of tool chain
+    heroku_print("\nTool Execution Summary:")
+
+    responses.each_with_index do |response, index|
+      message = response.dig("choices", 0, "message")
+      next unless message
+
+      # Check if this message contains tool calls
+      if message["tool_calls"]
+        message["tool_calls"].each do |tool_call|
+          function = tool_call.dig("function")
+          next unless function
+
+          tool_name = function["name"]
+          begin
+            args = JSON.parse(function["arguments"])
+
+            case tool_name
+            when "database_get_schema"
+              heroku_print("\n🔍 Database Schema Requested")
+            when "database_run_query"
+              if args["query"]
+                heroku_print("\n📊 Database Query Executed:")
+                print_markdown("```sql\n#{args["query"]}\n```")
+                query_results << args["query"]
+              end
+            end
+          rescue JSON::ParserError => e
+            _log_debug("Error parsing tool call arguments: #{e.message}")
+          end
+        end
+      end
+    end
   end
 
   def with_spinners(action_msg, &block)
@@ -186,7 +229,7 @@ class Render
         when /\Acode_exec_go/
           "Compiling and executing Go code..."
         when /\Adatabase_get_schema/
-          "MIA is the database's schema..."
+          "MIA is reading the database's schema..."
         when /\Adatabase_run_query/
           "Querying the database..."
         when /\Adyno_run_command/
