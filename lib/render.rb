@@ -1,14 +1,19 @@
 class Render
   attr_reader :all_responses
 
+  DEBUG_LOG_FILE = "mia_debug.log".freeze
+
   def initialize
     @pastel = Pastel.new.magenta.bold.detach
     @prompt = TTY::Prompt.new
     @client = OpenAI::Client.new(
-      access_token: ENV["DYNO_INTEROP_TOKEN"],
-      uri_base: ENV["DYNO_INTEROP_BASE_URL"]
+      access_token: ENV["INFERENCE_KEY"],
+      uri_base: ENV["INFERENCE_URL"]
     )
     @all_responses = [] # keeps a record of the responses that stream back
+    @debug_logging_enabled = true
+    @debug_log = File.open(DEBUG_LOG_FILE, "a") if @debug_logging_enabled
+    _log_debug("\n\n=== NEW RENDER INSTANCE INITIALIZED #{Time.now} ===")
   end
 
   def heroku_print(str)
@@ -85,6 +90,9 @@ class Render
     request = JSON.parse(request)
     spinner = nil
 
+    _log_debug("Starting inference request with params: #{request.reject { |k, _| k == 'messages' }.inspect}")
+    _log_debug("Request messages: #{request['messages'].inspect}") if request['messages']
+
     with_spinners("The Agent is...") do |spinners|
       spinner = spinners.register(
         "Sending an inference request to Heroku... :spinner",
@@ -95,6 +103,7 @@ class Render
       stream_proc = Proc.new do |chunk, _bytesize|
         spinner.success if spinner
         @all_responses << chunk
+        _log_debug("Received response chunk: #{chunk.inspect}")
         spinner = spinners.register(
           "#{summarize_message(chunk.dig("choices", 0, "message"))}... :spinner",
           success_mark: "✅"
@@ -102,11 +111,23 @@ class Render
         spinner.auto_spin
       end
 
-      @client.chat(parameters: request.merge(stream: stream_proc))
+      begin
+        @client.chat(parameters: request.merge(stream: stream_proc))
+      rescue => e
+        _log_debug("Error in inference request: #{e.class} - #{e.message}")
+        _log_debug(e.backtrace.join("\n")) if e.backtrace
+        raise e
+      end
     end
 
     # Mark the last spinner as complete
     spinner.success
+
+    if @all_responses.empty?
+      _log_debug("Warning: No responses received from inference request")
+    else
+      _log_debug("Completed inference request successfully")
+    end
 
     # Print the content of the last response
     if print_last_message
@@ -118,11 +139,19 @@ class Render
 
   def with_spinners(action_msg, &block)
     puts "\n"
+    _log_debug("Starting spinner action: #{action_msg}")
     spinners = TTY::Spinner::Multi.new(
       @pastel.call("#{action_msg}... :spinner"),
       format: :dots_2
     )
-    yield(spinners)
+    begin
+      yield(spinners)
+      _log_debug("Spinner action completed: #{action_msg}")
+    rescue => e
+      _log_debug("Error in spinner action '#{action_msg}': #{e.class} - #{e.message}")
+      _log_debug(e.backtrace.join("\n")) if e.backtrace
+      raise e
+    end
   end
 
   def confirm(msg)
@@ -132,6 +161,9 @@ class Render
   private
 
   def summarize_message(message)
+    return "No message to summarize" if message.nil?
+    _log_debug("Summarizing message with role: #{message["role"]}")
+
     case message["role"]
     when "user"
       "Prompt sent."
@@ -139,8 +171,10 @@ class Render
       tool_call = message.dig("tool_calls", 0)
       if tool_call
         args = JSON.parse(tool_call.dig("function", "arguments"))
+        tool_name = tool_call.dig("function", "name")
+        _log_debug("Tool call detected: #{tool_name} with args: #{args.inspect}")
 
-        case tool_call.dig("function", "name")
+        case tool_name
         when /\Aweb_browsing_single_page/, /\Aweb_browsing_multi_page/
           "Fetching the page #{args["url"]} ..."
         when /\Acode_exec_ruby/
@@ -165,8 +199,16 @@ class Render
           "Reading the PDF at #{args["url"]} ..."
         end
       else
+        _log_debug("No tool calls in assistant message")
         "The agent has the information it needs."
       end
     end
+  end
+
+  def _log_debug(message)
+    return unless @debug_logging_enabled && @debug_log
+    timestamp = Time.now.strftime("%Y-%m-%d %H:%M:%S.%L")
+    @debug_log.puts("[#{timestamp}] #{message}")
+    @debug_log.flush # Ensure messages are written immediately
   end
 end
